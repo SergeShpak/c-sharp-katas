@@ -8,9 +8,9 @@ public class NthRoot_Tests
     [Fact]
     public void Calculator_GetNthRoot_CalculatesRootCorrectly()
     {
-        const double diff = 0.00001;
+        const double diff = 0.000001;
         foreach (var tc in new List<(double inNumber, int inN)> {
-        (0, 10),
+        (100, 2),
         (10, 10),
         (1000000000, 15),
     })

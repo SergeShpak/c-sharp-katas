@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NthRoot.Tests", "NthRoot.Tests\NthRoot.Tests.csproj", "{D0E0E366-F36D-440E-BDF6-80611A1893C4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NthRoot", "NthRoot\NthRoot.csproj", "{89DAD4E2-6B72-4274-9694-1343CD59CA4D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D0E0E366-F36D-440E-BDF6-80611A1893C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0E0E366-F36D-440E-BDF6-80611A1893C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0E0E366-F36D-440E-BDF6-80611A1893C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0E0E366-F36D-440E-BDF6-80611A1893C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89DAD4E2-6B72-4274-9694-1343CD59CA4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89DAD4E2-6B72-4274-9694-1343CD59CA4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89DAD4E2-6B72-4274-9694-1343CD59CA4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89DAD4E2-6B72-4274-9694-1343CD59CA4D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

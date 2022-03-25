@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 public struct StringsWithSameHash
 {
@@ -32,27 +33,45 @@ public static class Searcher
             : base(message, innerException) { }
     }
 
-    public static StringsWithSameHash FindStringsWithSameHash()
+    public static StringsWithSameHash FindStringsWithSameHash(bool isParallel = true, int lengthLimit = 10)
     {
-        return FindStringsWithSameHash(10);
+        return FindStringsWithSameHash(lengthLimit, isParallel);
     }
 
-    public static StringsWithSameHash FindStringsWithSameHash(int lengthLimit)
+    public static StringsWithSameHash FindStringsWithSameHash(int lengthLimit, bool isParallel)
+    {
+        Stopwatch stopWatch = new Stopwatch();
+        stopWatch.Start();
+        var result = findStringsWithSameHash(lengthLimit, isParallel);
+        stopWatch.Stop();
+        TimeSpan ts = stopWatch.Elapsed;
+        string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
+            ts.Minutes, ts.Seconds,
+            ts.Milliseconds / 10
+        );
+
+        Console.WriteLine($"Result: {result}");
+        Console.WriteLine($"RunTime (is parallel: {isParallel}) {elapsedTime}");
+        return result;
+    }
+
+    private static StringsWithSameHash findStringsWithSameHash(int lengthLimit, bool isParallel)
     {
         Random randGen = new Random();
         var alphabet = generateAsciiSet();
         var (first, second) = performBirthdayParadoxAttack(alphabet, lengthLimit: lengthLimit);
         Console.WriteLine("Found a collision");
-        var third = findCollision(alphabet, new string[] { first, second });
+        var third = findCollision(alphabet, new string[] { first, second }, isParallel: isParallel);
         Console.WriteLine("Found another collision");
         var result = new StringsWithSameHash(
             first,
             second,
             third
         );
-        Console.WriteLine(result);
         return result;
     }
+
+
     private static Func<string, bool> generateParadoxAttackCheck(Dictionary<int, string> foundHashes)
     {
         return delegate (string sToCheck)
@@ -79,10 +98,17 @@ public static class Searcher
         return ((string)first, foundCollision);
     }
 
-    private static string findCollision(char[] alphabet, string[] foundStrings, int startLength = 5, int lengthLimit = 10)
+    private static string findCollision(char[] alphabet, string[] foundStrings, int startLength = 5, int lengthLimit = 10, bool isParallel = true)
     {
-        //var foundCollision = generateAllStrings(generateFindCollisionCheck(foundStrings), alphabet, startLength, lengthLimit);
-        var foundCollision = generateAllStringsInParallel(generateFindCollisionCheck(foundStrings), alphabet, startLength, lengthLimit);
+        string? foundCollision;
+        if (isParallel)
+        {
+            foundCollision = generateAllStringsInParallel(generateFindCollisionCheck(foundStrings), alphabet, startLength, lengthLimit);
+        }
+        else
+        {
+            foundCollision = generateAllStrings(generateFindCollisionCheck(foundStrings), alphabet, startLength, lengthLimit);
+        }
         return foundCollision;
     }
 

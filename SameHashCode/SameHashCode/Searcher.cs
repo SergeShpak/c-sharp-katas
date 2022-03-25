@@ -178,7 +178,7 @@ public static class Searcher
                         }
                     });
         }
-        catch (OperationCanceledException e) { }
+        catch (OperationCanceledException) { }
         finally
         {
             cts.Dispose();

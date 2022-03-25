@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public struct StringsWithSameHash
 {
@@ -17,7 +18,7 @@ public struct StringsWithSameHash
 
     public override string ToString()
     {
-        return $"(\"{First}\", \"{Second}\", \"{Third})\"";
+        return $"(\"{First}\", \"{Second}\", \"{Third}\")";
     }
 }
 
@@ -80,7 +81,8 @@ public static class Searcher
 
     private static string findCollision(char[] alphabet, string[] foundStrings, int startLength = 5, int lengthLimit = 10)
     {
-        var foundCollision = generateAllStrings(generateFindCollisionCheck(foundStrings), alphabet, startLength, lengthLimit);
+        //var foundCollision = generateAllStrings(generateFindCollisionCheck(foundStrings), alphabet, startLength, lengthLimit);
+        var foundCollision = generateAllStringsInParallel(generateFindCollisionCheck(foundStrings), alphabet, startLength, lengthLimit);
         return foundCollision;
     }
 
@@ -122,6 +124,90 @@ public static class Searcher
             currLen++;
         }
         throw new HashCollisionNotFoundException();
+    }
+
+    private static string generateAllStringsInParallel(Func<string, bool> check, char[] alphabet, int startLength, int lengthLimit)
+    {
+        var paramsGen = new TasksParamsGenerator(alphabet, startLength, lengthLimit);
+        CancellationTokenSource cts = new CancellationTokenSource();
+        ParallelOptions po = new ParallelOptions();
+        po.CancellationToken = cts.Token;
+        po.MaxDegreeOfParallelism = System.Environment.ProcessorCount;
+        String? result = null;
+        var localLockObject = new object();
+        try
+        {
+            Parallel.ForEach(paramsGen.GetTaskParams(), po, (tp, state) =>
+                    {
+                        var acc = new Char[tp.length];
+                        acc[0] = tp.startChar;
+                        var taskResult = generateAllStringsAux(check, alphabet, acc, tp.length - 1);
+                        if (taskResult != null)
+                        {
+                            lock (localLockObject)
+                            {
+                                result = taskResult;
+                            }
+                            cts.Cancel();
+                        }
+                    });
+        }
+        catch (OperationCanceledException e) { }
+        finally
+        {
+            cts.Dispose();
+        }
+        if (result is null)
+        {
+            throw new HashCollisionNotFoundException();
+        }
+        return result;
+    }
+
+    private struct TaskParams
+    {
+        public Char startChar;
+        public int length;
+
+        public TaskParams(Char startChar, int length)
+        {
+            this.startChar = startChar;
+            this.length = length;
+        }
+    }
+
+    private class TasksParamsGenerator
+    {
+        private Char[] alphabet;
+        private int currPos;
+        private int currLen;
+        private int maxLen;
+        private object lockObj;
+
+        public TasksParamsGenerator(Char[] alphabet, int startLen, int maxLen)
+        {
+            this.alphabet = alphabet;
+            this.currLen = startLen;
+            this.currPos = 0;
+            this.maxLen = maxLen;
+            this.lockObj = new Object();
+        }
+
+        public IEnumerable<TaskParams> GetTaskParams()
+        {
+            while (this.currLen <= this.maxLen)
+            {
+                if (currPos >= this.alphabet.Length)
+                {
+                    currPos = 0;
+                    currLen++;
+                }
+                var ch = this.alphabet[currPos];
+                this.currPos++;
+                yield return new TaskParams(ch, this.currLen);
+            }
+            yield break;
+        }
     }
 
     private static string? generateAllStringsAux(Func<string, bool> check, char[] alphabet, char[] acc, int remaining)
